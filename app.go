@@ -292,6 +292,12 @@ func GetLogout(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetIndex(w http.ResponseWriter, r *http.Request) {
+
+	// Done: 変数宣言はforのそと
+	var id, userID, private int
+	var body string
+	var createdAt time.Time
+
 	// TODO: get userが二度手間では？
 	if !authenticated(w, r) {
 		return
@@ -312,10 +318,6 @@ func GetIndex(w http.ResponseWriter, r *http.Request) {
 	}
 	entries := make([]Entry, 0, 5)
 	for rows.Next() {
-		// TODO: 変数宣言はforのそと
-		var id, userID, private int
-		var body string
-		var createdAt time.Time
 		checkErr(rows.Scan(&id, &userID, &private, &body, &createdAt))
 		// sTODO: pritN
 		entries = append(entries, Entry{id, userID, private == 1, strings.SplitN(body, "\n", 2)[0], strings.SplitN(body, "\n", 2)[1], createdAt})
@@ -448,6 +450,10 @@ LIMIT 10`, user.ID)
 }
 
 func GetProfile(w http.ResponseWriter, r *http.Request) {
+	// Done:変数宣言はforの外
+	var id, userID, private int
+	var body string
+	var createdAt time.Time
 	if !authenticated(w, r) {
 		return
 	}
@@ -472,9 +478,6 @@ func GetProfile(w http.ResponseWriter, r *http.Request) {
 	}
 	entries := make([]Entry, 0, 5)
 	for rows.Next() {
-		var id, userID, private int
-		var body string
-		var createdAt time.Time
 		checkErr(rows.Scan(&id, &userID, &private, &body, &createdAt))
 		entry := Entry{id, userID, private == 1, strings.SplitN(body, "\n", 2)[0], strings.SplitN(body, "\n", 2)[1], createdAt}
 		entries = append(entries, entry)
