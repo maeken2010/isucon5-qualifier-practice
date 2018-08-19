@@ -291,6 +291,7 @@ func GetLogout(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetIndex(w http.ResponseWriter, r *http.Request) {
+	// TODO: get userが二度手間では？
 	if !authenticated(w, r) {
 		return
 	}
@@ -298,7 +299,7 @@ func GetIndex(w http.ResponseWriter, r *http.Request) {
 	user := getCurrentUser(w, r)
 
 	prof := Profile{}
-	row := db.QueryRow(`SELECT * FROM profiles WHERE user_id = ?`, user.ID)
+	row := db.QueryRow(`SELECT * FROM profiles WHERE user_id = ?`, user.ID) // TODO: とってくるのは１つだけ
 	err := row.Scan(&prof.UserID, &prof.FirstName, &prof.LastName, &prof.Sex, &prof.Birthday, &prof.Pref, &prof.UpdatedAt)
 	if err != sql.ErrNoRows {
 		checkErr(err)
@@ -310,10 +311,12 @@ func GetIndex(w http.ResponseWriter, r *http.Request) {
 	}
 	entries := make([]Entry, 0, 5)
 	for rows.Next() {
+		// TODO: 変数宣言はforのそと
 		var id, userID, private int
 		var body string
 		var createdAt time.Time
 		checkErr(rows.Scan(&id, &userID, &private, &body, &createdAt))
+		// sTODO: pritN
 		entries = append(entries, Entry{id, userID, private == 1, strings.SplitN(body, "\n", 2)[0], strings.SplitN(body, "\n", 2)[1], createdAt})
 	}
 	rows.Close()
@@ -345,7 +348,7 @@ LIMIT 10`, user.ID)
 		var body string
 		var createdAt time.Time
 		checkErr(rows.Scan(&id, &userID, &private, &body, &createdAt))
-		if !isFriend(w, r, userID) {
+		if !isFriend(w, r, userID) { //TODO: やばい
 			continue
 		}
 		entriesOfFriends = append(entriesOfFriends, Entry{id, userID, private == 1, strings.SplitN(body, "\n", 2)[0], strings.SplitN(body, "\n", 2)[1], createdAt})
@@ -371,8 +374,10 @@ LIMIT 10`, user.ID)
 		var body string
 		var createdAt time.Time
 		checkErr(row.Scan(&id, &userID, &private, &body, &createdAt))
+		// TODO: spritN
 		entry := Entry{id, userID, private == 1, strings.SplitN(body, "\n", 2)[0], strings.SplitN(body, "\n", 2)[1], createdAt}
 		if entry.Private {
+			// TODO: isFriendやばい
 			if !permitted(w, r, entry.UserID) {
 				continue
 			}
@@ -384,6 +389,7 @@ LIMIT 10`, user.ID)
 	}
 	rows.Close()
 
+	// TODO: oneとanotherふくすうある
 	rows, err = db.Query(`SELECT * FROM relations WHERE one = ? OR another = ? ORDER BY created_at DESC`, user.ID, user.ID)
 	if err != sql.ErrNoRows {
 		checkErr(err)
