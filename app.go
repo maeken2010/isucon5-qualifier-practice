@@ -3,10 +3,6 @@ package main
 import (
 	"database/sql"
 	"errors"
-	"github.com/go-sql-driver/mysql"
-	"github.com/gorilla/context"
-	"github.com/gorilla/mux"
-	"github.com/gorilla/sessions"
 	"html/template"
 	"log"
 	"net/http"
@@ -16,6 +12,11 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/go-sql-driver/mysql"
+	"github.com/gorilla/context"
+	"github.com/gorilla/mux"
+	"github.com/gorilla/sessions"
 )
 
 var (
@@ -299,7 +300,7 @@ func GetIndex(w http.ResponseWriter, r *http.Request) {
 	user := getCurrentUser(w, r)
 
 	prof := Profile{}
-	row := db.QueryRow(`SELECT * FROM profiles WHERE user_id = ?`, user.ID) // TODO: とってくるのは１つだけ
+	row := db.QueryRow(`SELECT * FROM profiles WHERE user_id = ? LIMIT 1`, user.ID) // Done: とってくるのは１つだけ
 	err := row.Scan(&prof.UserID, &prof.FirstName, &prof.LastName, &prof.Sex, &prof.Birthday, &prof.Pref, &prof.UpdatedAt)
 	if err != sql.ErrNoRows {
 		checkErr(err)
